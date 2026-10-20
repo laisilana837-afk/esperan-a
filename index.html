@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estuda — App Estudantil</title>
+<meta name="description" content="App estudantil simples e rápido: tarefas, disciplinas, notas e timer Pomodoro. Funciona offline.">
+<meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estuda">
+<script>
+  // Evita flash de tema errado
+  try {
+    var s = JSON.parse(localStorage.getItem('estudantil:v1') || '{}');
+    var t = (s.settings && s.settings.theme) || 'auto';
+    var dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  } catch (e) {}
+</script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar (desktop) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="" width="34" height="34">
+      <span>Estuda</span>
+    </div>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="nav-btn is-active" data-view="hoje"><svg viewBox="0 0 24 24" class="ico"><path d="M3 10.5 12 3l9 7.5V21H14v-6h-4v6H3z"/></svg><span>Hoje</span></button>
+      <button class="nav-btn" data-view="tarefas"><svg viewBox="0 0 24 24" class="ico"><path d="M4 3h16v18H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Tarefas</span></button>
+      <button class="nav-btn" data-view="disciplinas"><svg viewBox="0 0 24 24" class="ico"><path d="M4 5h7v15H4zM13 5h7v15h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 5h16" stroke="currentColor" stroke-width="2"/></svg><span>Disciplinas</span></button>
+      <button class="nav-btn" data-view="notas"><svg viewBox="0 0 24 24" class="ico"><path d="M5 3h11l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12h8M8 16h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Notas</span></button>
+      <button class="nav-btn" data-view="timer"><svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2M9 2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Timer</span></button>
+    </nav>
+
+    <div class="side-foot">
+      <button class="nav-btn" id="btn-settings"><svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Ajustes</span></button>
+      <button class="nav-btn" id="btn-theme"><svg viewBox="0 0 24 24" class="ico"><path d="M20 14a8 8 0 1 1-10-10 7 7 0 0 0 10 10z"/></svg><span>Tema</span></button>
+    </div>
+  </aside>
+
+  <!-- Conteúdo -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="view-title">Hoje</h1>
+        <p class="muted" id="view-sub">Sua agenda do dia</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-primary" data-action="new-task">+ Tarefa</button>
+      </div>
+    </header>
+
+    <!-- HOJE -->
+    <section class="view is-active" id="view-hoje">
+      <div class="grid-2">
+        <div class="card hero">
+          <div class="hero-top">
+            <div>
+              <h2 id="greeting">Olá</h2>
+              <p class="muted" id="today-date">—</p>
+            </div>
+            <div class="ring" id="ring" style="--p:0">
+              <span id="ring-label">0%</span>
+            </div>
+          </div>
+          <div class="stats" id="stats"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Próximos prazos</h3>
+            <button class="link" data-view="tarefas">Ver tudo</button>
+          </div>
+          <ul class="list" id="deadlines"></ul>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <h3>Tarefas de hoje</h3>
+            <button class="link" data-action="new-task">Adicionar</button>
+          </div>
+          <ul class="list" id="today-list"></ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Últimos 7 dias</h3>
+            <span class="muted small">concluídas</span>
+          </div>
+          <div class="chart" id="week-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAREFAS -->
+    <section class="view" id="view-tarefas">
+      <div class="card">
+        <div class="toolbar">
+          <input class="input" id="task-search" type="search" placeholder="Buscar tarefas..." autocomplete="off">
+          <select class="input" id="task-filter-subject">
+            <option value="">Todas as disciplinas</option>
+          </select>
+          <select class="input" id="task-filter-status">
+            <option value="all">Todos</option>
+            <option value="pending">Pendentes</option>
+            <option value="done">Concluídas</option>
+          </select>
+        </div>
+        <ul class="list" id="tasks-list"></ul>
+      </div>
+    </section>
+
+    <!-- DISCIPLINAS -->
+    <section class="view" id="view-disciplinas">
+      <div class="card">
+        <div class="card-head">
+          <h3>Minhas disciplinas</h3>
+          <button class="btn btn-ghost" data-action="new-subject">+ Disciplina</button>
+        </div>
+        <div class="subjects" id="subjects-grid"></div>
+      </div>
+    </section>
+
+    <!-- NOTAS -->
+    <section class="view" id="view-notas">
+      <div class="card">
+        <div class="card-head">
+          <h3>Notas por disciplina</h3>
+          <button class="btn btn-ghost" data-action="new-grade">+ Nota</button>
+        </div>
+        <div class="subjects" id="grades-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Histórico</h3></div>
+        <ul class="list" id="grades-list"></ul>
+      </div>
+    </section>
+
+    <!-- TIMER -->
+    <section class="view" id="view-timer">
+      <div class="card timer-card">
+        <div class="modes" id="timer-modes">
+          <button class="chip is-active" data-mode="focus">Foco</button>
+          <button class="chip" data-mode="short">Pausa curta</button>
+          <button class="chip" data-mode="long">Pausa longa</button>
+        </div>
+        <div class="timer-face" id="timer-face" style="--p:0">
+          <span id="timer-time">25:00</span>
+          <small id="timer-label">Hora de focar</small>
+        </div>
+        <div class="timer-actions">
+          <button class="btn btn-ghost" id="timer-reset">Reiniciar</button>
+          <button class="btn btn-primary btn-lg" id="timer-toggle">Iniciar</button>
+          <button class="btn btn-ghost" id="timer-skip">Pular</button>
+        </div>
+        <p class="muted small" id="timer-count">0 sessões concluídas hoje</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Tabbar (mobile) -->
+  <nav class="tabbar" aria-label="Navegação">
+    <button class="tab is-active" data-view="hoje"><svg viewBox="0 0 24 24" class="ico"><path d="M3 10.5 12 3l9 7.5V21H14v-6h-4v6H3z"/></svg><span>Hoje</span></button>
+    <button class="tab" data-view="tarefas"><svg viewBox="0 0 24 24" class="ico"><path d="M4 3h16v18H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Tarefas</span></button>
+    <button class="tab" data-view="disciplinas"><svg viewBox="0 0 24 24" class="ico"><path d="M4 5h7v15H4zM13 5h7v15h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 5h16" stroke="currentColor" stroke-width="2"/></svg><span>Disciplinas</span></button>
+    <button class="tab" data-view="notas"><svg viewBox="0 0 24 24" class="ico"><path d="M5 3h11l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12h8M8 16h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Notas</span></button>
+    <button class="tab" data-view="timer"><svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2M9 2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Timer</span></button>
+  </nav>
+
+  <button class="fab" data-action="new-task" aria-label="Nova tarefa">+</button>
+</div>
+
+<!-- ============ Diálogos ============ -->
+<dialog class="modal" id="dlg-task">
+  <form method="dialog" id="form-task">
+    <h3 id="dlg-task-title">Nova tarefa</h3>
+    <label class="field">
+      <span>Título</span>
+      <input class="input" name="title" required maxlength="90" placeholder="Ex: Revisar capítulos 1 a 3" autocomplete="off">
+    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>Disciplina</span>
+        <select class="input" name="subjectId"><option value="">Sem disciplina</option></select>
+      </label>
+      <label class="field">
+        <span>Entrega</span>
+        <input class="input" name="due" type="date">
+      </label>
+    </div>
+    <div class="field-row">
+      <label class="field">
+        <span>Prioridade</span>
+        <select class="input" name="priority">
+          <option value="alta">Alta</option>
+          <option value="media" selected>Média</option>
+          <option value="baixa">Baixa</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Nota (opcional)</span>
+        <input class="input" name="note" maxlength="120" placeholder="Ex: cap. 4">
+      </label>
+    </div>
+    <input type="hidden" name="id">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+      <button class="btn btn-primary" value="save">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="dlg-subject">
+  <form method="dialog" id="form-subject">
+    <h3 id="dlg-subject-title">Nova disciplina</h3>
+    <label class="field">
+      <span>Nome</span>
+      <input class="input" name="name" required maxlength="40" placeholder="Ex: Cálculo" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>Cor</span>
+      <div class="swatches" id="subject-swatches"></div>
+    </label>
+    <input type="hidden" name="id">
+    <input type="hidden" name="color" id="subject-color">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+      <button class="btn btn-primary" value="save">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="dlg-grade">
+  <form method="dialog" id="form-grade">
+    <h3 id="dlg-grade-title">Nova nota</h3>
+    <label class="field">
+      <span>Disciplina</span>
+      <select class="input" name="subjectId" required></select>
+    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>Avaliação</span>
+        <input class="input" name="title" required maxlength="40" placeholder="Ex: Prova 1" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Nota (0 a 10)</span>
+        <input class="input" name="value" type="number" min="0" max="10" step="0.1" required>
+      </label>
+    </div>
+    <div class="field-row">
+      <label class="field">
+        <span>Peso</span>
+        <input class="input" name="weight" type="number" min="1" max="10" step="1" value="1">
+      </label>
+      <label class="field">
+        <span>Data</span>
+        <input class="input" name="date" type="date">
+      </label>
+    </div>
+    <input type="hidden" name="id">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+      <button class="btn btn-primary" value="save">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="dlg-settings">
+  <form method="dialog" id="form-settings">
+    <h3>Ajustes</h3>
+    <div class="field-row field-row-3">
+      <label class="field">
+        <span>Foco (min)</span>
+        <input class="input" id="set-focus" type="number" min="1" max="120" step="1">
+      </label>
+      <label class="field">
+        <span>Pausa curta (min)</span>
+        <input class="input" id="set-break" type="number" min="1" max="60" step="1">
+      </label>
+      <label class="field">
+        <span>Pausa longa (min)</span>
+        <input class="input" id="set-long" type="number" min="2" max="120" step="1">
+      </label>
+    </div>
+    <label class="field">
+      <span>Tema</span>
+      <select class="input" id="set-theme">
+        <option value="auto">Automático</option>
+        <option value="light">Claro</option>
+        <option value="dark">Escuro</option>
+      </select>
+    </label>
+    <div class="modal-actions wrap">
+      <button class="btn btn-ghost" type="button" id="btn-export">Exportar</button>
+      <button class="btn btn-ghost" type="button" id="btn-import">Importar</button>
+      <button class="btn btn-danger" type="button" id="btn-reset">Apagar tudo</button>
+    </div>
+    <input type="file" id="file-import" accept="application/json" hidden>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

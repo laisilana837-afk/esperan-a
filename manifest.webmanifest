@@ -1,0 +1,23 @@
+{
+  "name": "Estuda — App Estudantil",
+  "short_name": "Estuda",
+  "description": "App estudantil simples e rápido: tarefas, disciplinas, notas e timer Pomodoro. Funciona offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b1020",
+  "theme_color": "#6366f1",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nova tarefa", "short_name": "Tarefa", "url": "./index.html?action=new-task" },
+    { "name": "Timer Pomodoro", "short_name": "Timer", "url": "./index.html?view=timer" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "estuda-pwa",
+  "version": "1.0.0",
+  "description": "App estudantil PWA: tarefas, disciplinas, notas e timer Pomodoro. Sem build, sem dependências.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js 4173",
+    "icons": "python3 tools/make_icons.py",
+    "test": "node --check js/store.js && node --check js/app.js"
+  },
+  "keywords": ["pwa", "estudantil", "pomodoro", "tarefas", "offline"],
+  "license": "MIT"
+}
